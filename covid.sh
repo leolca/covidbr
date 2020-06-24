@@ -10,6 +10,7 @@ display_help() {
     echo "   -h, --help         Display this help message"
     echo "   -c, --city		City name"
     echo "   -s, --state	State acronym"
+    echo "   -n, --nsamples     Number of samples in moving average"
     # echo some stuff here for the -a or --add-options
     echo "   Example: ./covid.sh -c 'Belo Horizonte' -s 'MG'"
     exit 1
@@ -35,6 +36,10 @@ while [[ $# -gt 0 ]]; do
 	shift
 	STATE=$1
 	;;
+        -n|--nsamples)
+        shift
+	N=$1
+	;;
         # display help
         -h | --help)
         display_help  # Call your function
@@ -53,6 +58,7 @@ done
 
 if [ -z "$CITY" ]; then echo "City not set!"; display_help; exit 0; fi
 if [ -z "$STATE" ]; then echo "State not set!"; display_help; exit 0; fi
+if [ -z "$N" ]; then N=5; fi
 
 THECITY=${CITY// /+}
 URL="https://brasil.io/dataset/covid19/caso/?state=$STATE&city=$THECITY&format=csv"
@@ -74,6 +80,6 @@ tail -n +2 /tmp/covid.csv | awk -F, 'BEGIN{OFS="\t"} {if(p1){print p1,p5-$5,p6-$
 THELOCATION="$CITY, $STATE"
 MAX1=$(awk 'BEGIN{max=0} /[0-9]/{if($2>max){max=$2}}END{print max}' /tmp/covid.dat)
 MAX2=$(awk 'BEGIN{max=0} /[0-9]/{if($3>max){max=$3}}END{print max}' /tmp/covid.dat)
-gnuplot -e "location='$THELOCATION';ymax1=$MAX1;ymax2=$MAX2" -p covid.gnu
+gnuplot -e "location='$THELOCATION';ymax1=$MAX1;ymax2=$MAX2;n=$N" -p covid.gnu
 eog /tmp/covid.png
 
