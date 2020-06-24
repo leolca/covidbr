@@ -6,7 +6,7 @@ O script utiliza os dados de https://brasil.io/ para criar os gráficos de novos
 Modos de utilização:
 
 ```
-./covid.sh -c 'Belo Horizonte' -s 'MG'
+./covid.sh -c 'Belo Horizonte' -s 'MG' -n 7
 ```
 
 ![covid Belo Horiznte](covid.png)
