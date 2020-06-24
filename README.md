@@ -1,5 +1,5 @@
 # covidbr
-Covid 19 Brazil
+Covid 19 Brasil
 
 O script utiliza os dados de https://brasil.io/ para criar os gráficos de novos casos/mortes para a cidade desejada.
 
