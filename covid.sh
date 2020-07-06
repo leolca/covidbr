@@ -12,7 +12,7 @@ display_help() {
     echo "   -s, --state	State acronym"
     echo "   -n, --nsamples     Number of samples in moving average"
     # echo some stuff here for the -a or --add-options
-    echo "   Example: ./covid.sh -c 'Belo Horizonte' -s 'MG'"
+    echo "   Example: covid.sh -c 'Belo Horizonte' -s 'MG'"
     exit 1
 }
 
@@ -41,7 +41,7 @@ while [[ $# -gt 0 ]]; do
 	N=$1
 	;;
         # display help
-        -h | --help)
+        -h|--help)
         display_help  # Call your function
         exit 0
         ;;
@@ -62,7 +62,7 @@ if [ -z "$N" ]; then N=5; fi
 
 THECITY=${CITY// /+}
 URL="https://brasil.io/dataset/covid19/caso/?state=$STATE&city=$THECITY&format=csv"
-wget -O /tmp/covid.csv $URL
+wget -O /tmp/covid.csv $URL --user-agent Mozilla/4.0
 # wget -O /tmp/covidbh.csv "https://brasil.io/dataset/covid19/caso/?state=MG&city=Belo+Horizonte&format=csv"
 
 #tail -n +2 /tmp/covidbh.csv | awk -F, 'BEGIN{OFS="\t"} {if(p1){print p1,p5-$5,p6-$6;p1="";} p1=$1;p5=$5;p6=$6} END{print "e"}' |
@@ -80,6 +80,8 @@ tail -n +2 /tmp/covid.csv | awk -F, 'BEGIN{OFS="\t"} {if(p1){print p1,p5-$5,p6-$
 THELOCATION="$CITY, $STATE"
 MAX1=$(awk 'BEGIN{max=0} /[0-9]/{if($2>max){max=$2}}END{print max}' /tmp/covid.dat)
 MAX2=$(awk 'BEGIN{max=0} /[0-9]/{if($3>max){max=$3}}END{print max}' /tmp/covid.dat)
-gnuplot -e "location='$THELOCATION';ymax1=$MAX1;ymax2=$MAX2;n=$N" -p covid.gnu
+
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
+gnuplot -e "location='$THELOCATION';ymax1=$MAX1;ymax2=$MAX2;n=$N" -p $DIR/covid.gnu
 eog /tmp/covid.png
 
