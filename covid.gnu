@@ -1,5 +1,5 @@
 set terminal png; 
-set output '/tmp/covid.png';
+set output outputfile;
 set tmargin 0
 set bmargin 0
 set lmargin 3
@@ -45,7 +45,7 @@ set format x "%d/%m"
 set xtics right rotate by 45; #offset 0,0;
 set tics scale 0 font ",8"
 set key left top
-plot '/tmp/covid.dat' using 1:2 with boxes fs solid 0.25, \
+plot inputfile using 1:2 with boxes fs solid 0.25, \
     '' using 1:(avg_n($2)) with lines lc rgb "red" lw 2 title sprintf("movavg n=%d",n)
 
 
@@ -74,7 +74,7 @@ set xtics right rotate by 45; # offset -4,-1.4;
 set tics scale 0 font ",8"
 #set xlabel "data"
 set key left top
-plot '/tmp/covid.dat' using 1:3 with boxes fs solid 0.5, \
+plot inputfile using 1:3 with boxes fs solid 0.5, \
     '' using 1:(avg_n($3)) with lines lc rgb "red" lw 2 title sprintf("movavg n=%d",n)
 unset multiplot
 
