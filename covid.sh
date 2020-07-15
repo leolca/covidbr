@@ -61,7 +61,7 @@ while [[ $# -gt 0 ]]; do
     shift
 done
 
-if [ -z "$CITY" ]; then echo "City not set!"; display_help; exit 0; fi
+if [ -z "$CITY" ]; then STATEONLY=1; else STATEONLY=0; fi
 if [ -z "$STATE" ]; then echo "State not set!"; display_help; exit 0; fi
 if [ -z "$N" ]; then N=5; fi
 if [ -z "$OUTPUT" ]
@@ -80,8 +80,18 @@ URL="https://brasil.io/dataset/covid19/caso/?state=$STATE&city=$THECITY&format=c
 wget -O "$TMPCSVFILE" "$URL" --user-agent Mozilla/4.0 --quiet
 
 echo -e "data\tnovos_casos\tnovas_mortes" > "$TMPDATFILE"
-tail -n +2 "$TMPCSVFILE" | awk -F, 'BEGIN{OFS="\t"} {if(p1){print p1,p5-$5,p6-$6;p1="";} p1=$1;p5=$5;p6=$6}' >> "$TMPDATFILE"
-THELOCATION="$CITY, $STATE"
+if [ "$STATEONLY" -eq "1" ]
+then
+    TMPFILE=$(mktemp) || exit 1
+    tail -n +2 "$TMPCSVFILE" | awk -F, 'BEGIN{OFS=FS} {if($1 != date && date){print date,cases,deaths; cases=0; deaths=0} date=$1;cases+=$5;deaths+=$6} END{print date,cases,deaths}' > "$TMPFILE"
+    mv "$TMPFILE" "$TMPCSVFILE"
+    tail -n +2 "$TMPCSVFILE" | awk -F, 'BEGIN{OFS="\t"} {if(p1){print p1,p2-$2,p3-$3;p1="";} p1=$1;p2=$2;p3=$3}' >> "$TMPDATFILE"
+    THELOCATION="$STATE"
+else
+    tail -n +2 "$TMPCSVFILE" | awk -F, 'BEGIN{OFS="\t"} {if(p1){print p1,p5-$5,p6-$6;p1="";} p1=$1;p5=$5;p6=$6}' >> "$TMPDATFILE"
+    THELOCATION="$CITY, $STATE"
+fi
+
 MAX1=$(awk 'BEGIN{max=0} /[0-9]/{if($2>max){max=$2}}END{print max}' "$TMPDATFILE")
 MAX2=$(awk 'BEGIN{max=0} /[0-9]/{if($3>max){max=$3}}END{print max}' "$TMPDATFILE")
 
